@@ -17,6 +17,7 @@ const enabled = Boolean(ANALYTICS.gaMeasurementId) && import.meta.env.PROD
         <p id="consent-t" class="cb__text">
           Suvi uses Google Analytics to see which parts of this page are useful.
           Nothing goes to advertisers or data brokers.
+          <a class="cb__link" href="/privacy">What we collect</a>
         </p>
         <div class="cb__actions">
           <button type="button" class="cb__btn cb__btn--ghost" data-decline>Decline</button>
@@ -65,7 +66,9 @@ const enabled = Boolean(ANALYTICS.gaMeasurementId) && import.meta.env.PROD
         border-radius: var(--r-lg); padding: 18px 22px;
         box-shadow: 0 18px 50px rgba(24,17,54,.16);
       }
-      .cb__text { flex: 1; min-width: 240px; font-size: 14px; line-height: 1.55; color: var(--body); }
+      .cb__link { color: var(--brand); text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
+  .cb__link:hover { color: var(--brand-hover); }
+  .cb__text { flex: 1; min-width: 240px; font-size: 14px; line-height: 1.55; color: var(--body); }
       .cb__actions { display: flex; gap: 10px; margin-left: auto; }
       .cb__btn {
         border: 1px solid transparent; border-radius: 999px; cursor: pointer;

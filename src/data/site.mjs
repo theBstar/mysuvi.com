@@ -32,7 +32,7 @@ export const SITE = {
   ogImage: '/og.png',
   twitter: '@mysuvi',
   sameAs: SOCIAL.map((s) => s.href),
-  contactEmail: '',
+  contactEmail: 'founder.suvi@gmail.com',
   foundingDate: '',
   /** Platform support, quoted verbatim from the pricing section. */
   platformNote:
@@ -57,10 +57,10 @@ export const AUTHOR = {
     'parental controls with earned freedom. He writes here about first phones, screen ' +
     'time and what the software in this category can and cannot do.',
   /**
-   * Personal profiles, emitted as the Person `sameAs`. A personal LinkedIn here
-   * is worth adding before any journalist outreach — the platforms check.
+   * Personal profiles, emitted as the Person `sameAs`. The journalist-request
+   * platforms in `content/DISTRIBUTION.md` verify a named source against one.
    */
-  sameAs: [],
+  sameAs: ['https://www.linkedin.com/in/thebstar/'],
 }
 
 /**
