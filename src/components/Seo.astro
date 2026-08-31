@@ -21,7 +21,13 @@ const {
 
 // Astro.site comes from astro.config.mjs, so canonicals are always absolute
 // and always point at the production origin regardless of build host.
-const canonical = new URL(Astro.url.pathname.replace(/\/$/, '') || '/', Astro.site)
+//
+// Trailing slash is deliberate and must stay. Every page builds to
+// `<path>/index.html`, so GitHub Pages serves the directory form and 301s the
+// bare form to it. A canonical without the slash therefore points at a redirect
+// and disagrees with @astrojs/sitemap, which always emits the slash.
+const path = Astro.url.pathname.replace(/\/*$/, '/')
+const canonical = new URL(path, Astro.site)
 const ogImage = new URL(image, Astro.site)
 ---
 <meta charset="utf-8" />

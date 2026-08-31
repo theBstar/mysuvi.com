@@ -133,6 +133,7 @@ export const NAV = [
   { href: '#how', label: 'How it works' },
   { href: '#parents', label: 'For parents' },
   { href: '#pricing', label: 'Pricing' },
+  { href: '/blog', label: 'Blogs' },
 ]
 
 export const HERO = {

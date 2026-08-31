@@ -1,0 +1,160 @@
+---
+import { getCollection, render } from 'astro:content'
+import Base from '../../layouts/Base.astro'
+import { SITE } from '../../data/site.mjs'
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft)
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }))
+}
+
+const { post } = Astro.props
+const { Content, headings } = await render(post)
+const d = post.data
+const url = new URL(`/blog/${post.id}`, SITE.url).href
+
+const fmt = (x) =>
+  x.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+
+// Article schema, cross-referenced to the Organization already in the graph.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'BlogPosting',
+      '@id': `${url}#article`,
+      headline: d.title,
+      description: d.description,
+      datePublished: d.pubDate.toISOString(),
+      ...(d.updatedDate && { dateModified: d.updatedDate.toISOString() }),
+      author: { '@type': 'Organization', name: d.author, url: SITE.url },
+      publisher: { '@id': `${SITE.url}/#organization` },
+      mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+      inLanguage: SITE.lang,
+      keywords: d.tags.join(', '),
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: SITE.url },
+        { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE.url}/blog` },
+        { '@type': 'ListItem', position: 3, name: d.title, item: url },
+      ],
+    },
+  ],
+}
+---
+<Base title={`${d.title} — ${SITE.name}`} description={d.description}>
+  <script slot="head" type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+
+  <article class="post shell">
+    <nav class="post__crumbs" aria-label="Breadcrumb">
+      <a href="/">Home</a> <span aria-hidden="true">/</span> <a href="/blog">Blog</a>
+    </nav>
+
+    <header>
+      <h1 class="post__h1">{d.title}</h1>
+      <p class="post__meta">
+        <time datetime={d.pubDate.toISOString()}>{fmt(d.pubDate)}</time>
+        {d.updatedDate && <span> · Updated {fmt(d.updatedDate)}</span>}
+      </p>
+    </header>
+
+    <div class="post__answer">
+      <p class="post__answer-k">Short answer</p>
+      <p class="post__answer-v">{d.answers}</p>
+    </div>
+
+    {headings.filter((h) => h.depth === 2).length > 2 && (
+      <nav class="post__toc" aria-label="On this page">
+        <p class="post__toc-k">On this page</p>
+        <ol>
+          {headings.filter((h) => h.depth === 2).map((h) => (
+            <li><a href={`#${h.slug}`}>{h.text}</a></li>
+          ))}
+        </ol>
+      </nav>
+    )}
+
+    <div class="prose"><Content /></div>
+
+    <section class="post__sources">
+      <h2>Sources</h2>
+      <ol>
+        {d.sources.map((s) => (
+          <li><a href={s.url} rel="nofollow noopener" target="_blank">{s.label}</a></li>
+        ))}
+      </ol>
+    </section>
+
+    <aside class="post__cta">
+      <p class="post__cta-h">Suvi is a phone interface that teaches this, not just blocks it.</p>
+      <a class="post__cta-btn" href="/#waitlist">Join the waitlist →</a>
+    </aside>
+  </article>
+</Base>
+
+<style>
+  .post { max-width: 720px; padding-block: clamp(36px, 6vw, 64px); }
+  .post__crumbs { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+  .post__crumbs a { color: var(--muted); }
+  .post__crumbs a:hover { color: var(--brand); }
+  .post__h1 { font-size: clamp(30px, 5vw, 46px); letter-spacing: -1.2px; }
+  .post__meta { margin-top: 14px; font-size: 13.5px; color: var(--muted); }
+
+  .post__answer {
+    margin-top: 28px; padding: 18px 22px;
+    background: var(--brand-tint); border: 1px solid var(--brand-tint-border);
+    border-radius: var(--r-lg);
+  }
+  .post__answer-k {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.4px;
+    text-transform: uppercase; color: var(--brand-hover); margin-bottom: 6px;
+  }
+  .post__answer-v { font-size: 16px; line-height: 1.6; color: var(--ink-2); }
+
+  .post__toc {
+    margin-top: 28px; padding: 18px 22px;
+    border: 1px solid var(--border-warm); border-radius: var(--r-lg);
+  }
+  .post__toc-k {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.4px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+  }
+  .post__toc ol { margin: 0; padding-left: 20px; display: grid; gap: 5px; font-size: 14.5px; }
+
+  .prose { margin-top: 36px; font-size: 17px; line-height: 1.75; color: var(--ink-2); }
+  .prose :global(h2) {
+    font-family: var(--font-display); font-weight: 300; font-size: clamp(24px, 3.4vw, 30px);
+    letter-spacing: -0.8px; color: var(--ink); margin-top: 44px; margin-bottom: 14px;
+  }
+  .prose :global(h3) { font-size: 19px; margin-top: 30px; margin-bottom: 10px; color: var(--ink); }
+  .prose :global(p) { margin-bottom: 20px; }
+  .prose :global(ul), .prose :global(ol) { margin: 0 0 20px 22px; display: grid; gap: 8px; }
+  .prose :global(blockquote) {
+    margin: 26px 0; padding: 4px 0 4px 20px;
+    border-left: 3px solid var(--brand); color: var(--body); font-style: italic;
+  }
+  .prose :global(a) { text-decoration: underline; text-underline-offset: 2px; }
+  .prose :global(table) { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 15px; }
+  .prose :global(th), .prose :global(td) {
+    text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border-warm);
+  }
+
+  .post__sources { margin-top: 52px; padding-top: 26px; border-top: 1px solid var(--border-warm); }
+  .post__sources h2 { font-family: var(--font-ui); font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.4px; color: var(--muted); }
+  .post__sources ol { margin: 14px 0 0 20px; display: grid; gap: 7px; font-size: 14px; color: var(--muted); }
+
+  .post__cta {
+    margin-top: 44px; padding: 26px; border-radius: var(--r-xl);
+    background: var(--bg-warm); border: 1px solid var(--border-warm);
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .post__cta-h { font-size: 16px; font-weight: 500; max-width: 42ch; }
+  .post__cta-btn {
+    background: var(--brand); color: #fff; font-size: 14.5px; font-weight: 600;
+    padding: 11px 22px; border-radius: 999px; white-space: nowrap;
+  }
+  .post__cta-btn:hover { background: var(--brand-hover); color: #fff; }
+</style>
