@@ -80,8 +80,17 @@ converts to a signup that goes cold before the product arrives.
 
 Sequence, per the standard launch playbook:
 
-1. **BetaList now.** It exists for pre-launch products and its audience expects
-   alpha-stage software. This is the one launch board that fits our current state.
+1. **Peerlist Launchpad now.** Free, weekly: the window opens Monday 00:00 UTC and
+   the launch runs all week, so it is not a single-day scramble. Needs a verified
+   *personal* profile — company accounts cannot launch — and a project filled in
+   to 100%. Strong Indian developer audience. Asking for upvotes is a bannable
+   offence, so don't.
+
+   **BetaList is no longer free.** Checked 1 September 2026: "All submissions are
+   paid. There is no free submission option," with an automatic refund if the
+   startup isn't selected. Still the right *fit* for a pre-launch product — it
+   just now costs money, so treat it as a small paid experiment rather than the
+   default first move.
 2. **Product Hunt at ship, not before.** It is a six-week project. Successful
    launches draw the majority of day-one traffic from a pre-built waitlist and
    need roughly 200 supporters queued for the first hour. Our waitlist is the
