@@ -1,0 +1,86 @@
+---
+import Logo from './Logo.astro'
+import { PARENT } from '../data/site.mjs'
+/** Parent dashboard panel. Decorative — the surrounding prose carries the meaning. */
+---
+<div class="pd reveal--scroll" aria-hidden="true">
+  <div class="pd__top">
+    <Logo size="md" />
+    <span>Parent dashboard</span>
+  </div>
+
+  <div class="pd__grid">
+    <div>
+      <p class="pd__live"><i></i>{PARENT.live}</p>
+      <div class="pd__metrics">
+        {PARENT.metrics.map((m) => (
+          <div class="pd__metric">
+            <p class="pd__k">{m.label}</p>
+            <p class="pd__v">{m.value}</p>
+            <p class="pd__sub">{m.sub}</p>
+          </div>
+        ))}
+      </div>
+      <div class="pd__actions">
+        {PARENT.actions.map((a, i) => (
+          <span class:list={['pd__btn', i === 0 && 'pd__btn--primary']}>{a}</span>
+        ))}
+      </div>
+    </div>
+
+    <div class="pd__week">
+      <p class="pd__k">This week</p>
+      <div class="pd__bars">
+        {PARENT.bars.map((b) => (
+          <div class="pd__bar"><i style={`height:${b.h}`}></i><span>{b.d}</span></div>
+        ))}
+      </div>
+      <p class="pd__caption">{PARENT.barsCaption}</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .pd {
+    background: var(--bg); border-radius: var(--r-xl); padding: 26px;
+    box-shadow: 0 30px 80px rgba(0,0,0,.35);
+  }
+  .pd__top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 16px; border-bottom: 1px solid var(--border-cool); margin-bottom: 20px;
+  }
+  .pd__top span { font-size: 12.5px; color: var(--muted); }
+  .pd__grid { display: grid; gap: 20px; }
+  @media (min-width: 780px) { .pd__grid { grid-template-columns: 1.35fr 1fr; } }
+
+  .pd__live {
+    background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: var(--r-md);
+    padding: 13px 15px; display: flex; align-items: center; gap: 9px;
+    margin-bottom: 14px; font-size: 13.5px; color: var(--ok-ink);
+  }
+  .pd__live i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); flex-shrink: 0; }
+
+  .pd__metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .pd__metric { background: #fff; border: 1px solid var(--border-cool); border-radius: var(--r-md); padding: 14px; }
+  .pd__k { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .9px; margin-bottom: 6px; }
+  .pd__v { font-size: 26px; font-weight: 600; letter-spacing: -.6px; color: var(--ink); }
+  .pd__sub { font-size: 11.5px; color: var(--muted-warm); margin-top: 2px; }
+
+  .pd__actions { display: flex; gap: 9px; }
+  .pd__btn {
+    flex: 1; background: #fff; border: 1px solid var(--border-cool); border-radius: var(--r-sm);
+    padding: 12px 6px; text-align: center; font-size: 13.5px; color: var(--ink-2);
+  }
+  .pd__btn--primary { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+
+  .pd__week { background: #fff; border: 1px solid var(--border-cool); border-radius: var(--r-md); padding: 16px; }
+  .pd__week .pd__k { margin-bottom: 14px; }
+  .pd__bars { display: flex; align-items: flex-end; gap: 9px; height: 120px; margin-bottom: 10px; }
+  .pd__bar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; gap: 6px; }
+  .pd__bar i { display: block; width: 100%; background: var(--brand); border-radius: 5px; }
+  .pd__bar span { font-size: 9.5px; color: var(--muted-cool); text-align: center; }
+  .pd__caption {
+    font-size: 12.5px; color: var(--muted); line-height: 1.5;
+    border-top: 1px solid var(--border-hair); padding-top: 11px;
+  }
+</style>

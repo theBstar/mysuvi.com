@@ -1,0 +1,94 @@
+---
+import Logo from './Logo.astro'
+/** Hero device, rebuilt from the design's hero column. Decorative. */
+---
+<div class="hp" aria-hidden="true">
+  <div class="hp__halo"></div>
+  <div class="hp__body floaty">
+    <div class="hp__screen">
+      <div class="hp__status"><Logo size="xs" tone="dark" /><span>9:41</span></div>
+      <p class="hp__hi">Hey, Arjun</p>
+      <p class="hp__lvl">Explorer — Level 3</p>
+
+      <div class="hp__time">
+        <p class="hp__time-v">1h 47m</p>
+        <p class="hp__time-k">remaining today</p>
+        <div class="hp__bar"><i></i></div>
+      </div>
+
+      <div class="hp__quest">
+        <p class="hp__quest-k">Today’s quest</p>
+        <p class="hp__quest-t">Read for 20 minutes</p>
+        <p class="hp__quest-r">+30 points · bike gear 980/1,500</p>
+      </div>
+
+      <div class="hp__apps">
+        <span style="background:#FF6B6B"></span>
+        <span style="background:#4ADE80"></span>
+        <span style="background:#60A5FA"></span>
+        <span class="hp__apps-suvi"><Logo size="xs" tone="brand" markOnly /></span>
+      </div>
+
+      <div class="hp__dock">
+        <span><i></i>Home</span>
+        <span><i></i>Phone</span>
+        <span class="hp__dock-mid"><b><Logo size="xs" tone="brand" markOnly /></b>Suvi</span>
+        <span><i></i>Quests</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .hp { position: relative; display: flex; justify-content: center; }
+  .hp__halo {
+    position: absolute; width: 340px; height: 340px; border-radius: 50%;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: radial-gradient(circle, var(--brand-halo) 0%, rgba(250,250,248,0) 68%);
+  }
+  .hp__body {
+    position: relative; width: 262px; height: 530px;
+    background: var(--dark); border-radius: 38px; padding: 9px;
+    box-shadow: 0 30px 70px rgba(24,17,54,.28);
+  }
+  .hp__screen {
+    position: relative; width: 100%; height: 100%; overflow: hidden;
+    background: var(--dark-2); border-radius: 30px; padding: 18px 16px;
+  }
+  .hp__status {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+  }
+  .hp__status span { color: var(--muted); font-size: 9px; }
+  .hp__hi { color: #fff; font-size: 19px; font-weight: 600; margin-bottom: 3px; }
+  .hp__lvl { color: #7A7A8C; font-size: 11px; margin-bottom: 16px; }
+
+  .hp__time { background: var(--grad-night); border-radius: var(--r-lg); padding: 15px; margin-bottom: 12px; }
+  .hp__time-v { color: #fff; font-size: 28px; font-weight: 600; letter-spacing: -.5px; }
+  .hp__time-k { color: #A5B4FC; font-size: 11px; margin-bottom: 10px; }
+  .hp__bar { height: 5px; background: rgba(255,255,255,.16); border-radius: 999px; overflow: hidden; }
+  .hp__bar i { display: block; height: 100%; width: 62%; background: var(--brand-light); border-radius: 999px; }
+
+  .hp__quest { background: var(--dark-3); border-radius: 14px; padding: 13px; margin-bottom: 12px; }
+  .hp__quest-k {
+    font-size: 9.5px; letter-spacing: 1px; text-transform: uppercase;
+    color: #7A7A8C; margin-bottom: 7px;
+  }
+  .hp__quest-t { color: #fff; font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .hp__quest-r { color: var(--brand-accent); font-size: 11px; }
+
+  .hp__apps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+  .hp__apps > span { aspect-ratio: 1; border-radius: 11px; }
+  .hp__apps-suvi { background: var(--brand-accent); display: grid; place-items: center; }
+
+  .hp__dock {
+    position: absolute; inset: auto 0 0 0; background: rgba(15,15,26,.95);
+    padding: 11px 20px 16px; display: flex; justify-content: space-between; align-items: flex-end;
+  }
+  .hp__dock > span {
+    width: 44px; text-align: center; font-size: 7.5px; color: var(--muted);
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+  }
+  .hp__dock > span > i { display: block; width: 100%; height: 16px; border-radius: 4px; background: var(--dark-4); }
+  .hp__dock-mid { color: var(--brand-accent) !important; font-weight: 600; gap: 4px !important; }
+  .hp__dock-mid b { width: 32px; height: 32px; background: var(--brand); border-radius: 10px; display: grid; place-items: center; }
+</style>

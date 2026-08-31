@@ -1,0 +1,44 @@
+---
+import { ANALYTICS } from '../data/site.mjs'
+
+// Skipped in dev so local browsing never lands in the GA property.
+// import.meta.env.PROD is true for `astro build` (and so for `astro preview`).
+const id = ANALYTICS.gaMeasurementId
+const key = ANALYTICS.consentKey
+const enabled = Boolean(id) && import.meta.env.PROD
+---
+{enabled && (
+  <>
+    <!-- Google tag (gtag.js) — Consent Mode v2 -->
+    <script is:inline define:vars={{ id, key }}>
+      // define:vars wraps this in an IIFE, so `gtag` must be attached to window
+      // explicitly — otherwise later gtag('event', ...) calls would throw.
+      window.dataLayer = window.dataLayer || []
+      window.gtag = function gtag() { window.dataLayer.push(arguments) }
+
+      // Defaults MUST be pushed before gtag/js runs, hence this script sitting
+      // above the loader rather than below it as in Google's stock snippet.
+      window.gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        functionality_storage: 'granted',
+        security_storage: 'granted',
+        wait_for_update: 500,
+      })
+
+      // Re-apply a previous acceptance before the first hit, so returning
+      // visitors are measured properly instead of waiting on the banner.
+      try {
+        if (localStorage.getItem(key) === 'granted') {
+          window.gtag('consent', 'update', { analytics_storage: 'granted' })
+        }
+      } catch (e) { /* storage blocked — stay denied */ }
+
+      window.gtag('js', new Date())
+      window.gtag('config', id)
+    </script>
+    <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${id}`}></script>
+  </>
+)}

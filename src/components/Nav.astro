@@ -1,0 +1,37 @@
+---
+import Logo from './Logo.astro'
+import { NAV, WAITLIST } from '../data/site.mjs'
+---
+<header class="nav">
+  <div class="shell nav__in">
+    <a href="/" class="nav__brand" aria-label="Suvi — home"><Logo size="lg" animate /></a>
+    <nav class="nav__links" aria-label="Primary">
+      {NAV.map((i) => <a href={i.href}>{i.label}</a>)}
+      <a href="#waitlist" class="nav__cta">{WAITLIST.ctaLabel}</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(250,250,248,.82); backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav__in {
+    padding-block: 14px; display: flex; align-items: center;
+    justify-content: space-between; gap: 24px;
+  }
+  .nav__brand { display: flex; }
+  .nav__links { display: flex; align-items: center; gap: 28px; }
+  .nav__links a { font-size: 14px; color: var(--ink-3); font-weight: 500; }
+  .nav__links a:hover { color: var(--brand); }
+  .nav__cta {
+    background: var(--brand); color: #fff !important; font-weight: 600;
+    padding: 9px 18px; border-radius: 999px; white-space: nowrap;
+    transition: background .15s ease;
+  }
+  .nav__cta:hover { background: var(--brand-hover); }
+  /* Section links fold away before the CTA does. */
+  @media (max-width: 720px) { .nav__links a:not(.nav__cta) { display: none; } }
+</style>

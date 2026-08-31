@@ -1,0 +1,8 @@
+---
+import Base from '../layouts/Base.astro'
+import { SITE } from '../data/site.mjs'
+---
+<Base title={`Page not found — ${SITE.name}`} description="This page does not exist." noindex>
+  <h1>Page not found</h1>
+  <p><a href="/">Go back home</a></p>
+</Base>

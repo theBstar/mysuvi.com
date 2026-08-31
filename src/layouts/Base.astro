@@ -1,0 +1,42 @@
+---
+import Seo from '../components/Seo.astro'
+import JsonLd from '../components/JsonLd.astro'
+import Analytics from '../components/Analytics.astro'
+import ConsentBanner from '../components/ConsentBanner.astro'
+import QuestionModal from '../components/QuestionModal.astro'
+import Nav from '../components/Nav.astro'
+import Footer from '../components/Footer.astro'
+import { SITE } from '../data/site.mjs'
+import '../styles/global.css'
+
+interface Props {
+  title?: string
+  description?: string
+  image?: string
+  noindex?: boolean
+}
+const { title, description, image, noindex } = Astro.props
+---
+<!doctype html>
+<html lang={SITE.lang}>
+  <head>
+    <Seo title={title} description={description} image={image} noindex={noindex} />
+    <JsonLd />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300&family=Inter:wght@300;400&display=swap"
+    />
+    <Analytics />
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Nav />
+    <main id="main"><slot /></main>
+    <Footer />
+    <ConsentBanner />
+    <QuestionModal />
+  </body>
+</html>

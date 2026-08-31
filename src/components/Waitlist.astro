@@ -1,0 +1,146 @@
+---
+import { WAITLIST } from '../data/site.mjs'
+interface Props { tone?: 'light' | 'purple'; id?: string }
+const { tone = 'light', id = 'wl' } = Astro.props
+const W = WAITLIST
+---
+<div id={`${id}-wl`} class:list={['wl', `wl--${tone}`]} data-waitlist>
+  <form class="wl__form" novalidate>
+    {W.collectName && (
+      <div class="wl__row">
+        <label class="visually-hidden" for={`${id}-first`}>First name</label>
+        <input
+          id={`${id}-first`} type="text" name="first_name"
+          placeholder={W.firstNamePlaceholder} autocomplete="given-name" required data-first
+        />
+        <label class="visually-hidden" for={`${id}-last`}>Last name</label>
+        <input
+          id={`${id}-last`} type="text" name="last_name"
+          placeholder={W.lastNamePlaceholder} autocomplete="family-name" required data-last
+        />
+      </div>
+    )}
+    <div class="wl__row">
+      <label class="visually-hidden" for={`${id}-email`}>Email address</label>
+      <input
+        id={`${id}-email`} type="email" name={W.fieldName}
+        placeholder={W.placeholder} autocomplete="email" required data-email
+      />
+      <button type="submit" data-submit>{W.ctaLabel}</button>
+    </div>
+  </form>
+  <p class="wl__note" data-note>{W.note}</p>
+</div>
+
+<script>
+  import { WAITLIST } from '../data/site.mjs'
+
+  // One handler for every instance on the page. Astro hoists and bundles this
+  // once, however many times the component renders.
+  document.querySelectorAll('[data-waitlist]').forEach((root) => {
+    const form = root.querySelector('form')
+    const input = root.querySelector('[data-email]')
+    const firstEl = root.querySelector('[data-first]')
+    const lastEl = root.querySelector('[data-last]')
+    const button = root.querySelector('[data-submit]')
+    const note = root.querySelector('[data-note]')
+    if (!form || !input || !button || !note) return
+
+    let busy = false
+
+    const say = (text, state) => {
+      note.textContent = text
+      note.dataset.state = state ?? ''
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault()
+      if (busy) return
+
+      const email = input.value.trim()
+      if (!email || !input.checkValidity()) {
+        say('Please enter a valid email address.', 'error')
+        input.focus()
+        return
+      }
+
+      // Answers only stick on the CREATE call, so the questions have to be
+      // asked before the signup POST, not after it. Dismissing the modal still
+      // submits the address — the signup is never contingent on answering.
+      busy = true
+      button.disabled = true
+      button.textContent = WAITLIST.ctaLabelBusy
+      document.dispatchEvent(new CustomEvent('waitlist:ask', {
+        detail: { email, source: root.id || form.id || '' },
+      }))
+    })
+
+    const reset = () => {
+      busy = false
+      button.disabled = false
+      button.textContent = WAITLIST.ctaLabel
+    }
+
+    document.addEventListener('waitlist:done', (e) => {
+      if (e.detail.source !== (root.id || form.id || '')) return
+      button.textContent = WAITLIST.ctaLabelDone
+      button.disabled = true
+      input.value = ''
+      input.disabled = true
+      say(WAITLIST.doneNote, 'done')
+    })
+
+    document.addEventListener('waitlist:cancelled', (e) => {
+      if (e.detail.source !== (root.id || form.id || '')) return
+      reset()
+    })
+
+    // Clear an error as soon as they start fixing it.
+    const clear = () => { if (note.dataset.state === 'error') say(WAITLIST.note) }
+    ;[input, firstEl, lastEl].forEach((el) => el && el.addEventListener('input', clear))
+  })
+</script>
+
+<style>
+  .wl__form { display: flex; flex-direction: column; gap: 10px; max-width: 440px; }
+  .wl--purple .wl__form { max-width: 460px; margin-inline: auto; }
+  .wl__row { display: flex; gap: 10px; }
+  .wl__form input { flex: 1; min-width: 0; }
+  .wl__form input {
+    border-radius: var(--r-md);
+    padding: 14px 16px; font-size: 15px; outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .wl__form button {
+    border: none; border-radius: var(--r-md); padding: 14px 22px;
+    font-size: 15px; font-weight: 600; cursor: pointer; white-space: nowrap;
+    transition: background .15s ease, opacity .15s ease;
+  }
+  .wl__form input:disabled, .wl__form button:disabled { opacity: .6; cursor: default; }
+
+  .wl--light input { border: 1px solid #DDD9D0; background: #fff; color: var(--ink); }
+  .wl--light input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(124,58,237,.12); }
+  .wl--light input::placeholder { color: var(--muted-warm-2); }
+  .wl--light button { background: var(--brand); color: #fff; }
+  .wl--light button:hover:not(:disabled) { background: var(--brand-hover); }
+
+  .wl--purple input {
+    border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.12); color: #fff;
+    padding: 15px 16px;
+  }
+  .wl--purple input:focus { border-color: #fff; background: rgba(255,255,255,.2); box-shadow: none; }
+  .wl--purple input::placeholder { color: rgba(255,255,255,.72); }
+  .wl--purple button { background: #fff; color: var(--brand-deep); font-weight: 700; padding: 15px 24px; }
+  .wl--purple button:hover:not(:disabled) { background: var(--brand-tint); }
+
+  .wl__note { margin-top: 14px; font-size: 13.5px; }
+  .wl--light .wl__note { color: var(--muted-warm); }
+  .wl--purple .wl__note { color: #D6C6FF; text-align: center; }
+
+  .wl--light .wl__note[data-state='error'] { color: #B42318; }
+  .wl--purple .wl__note[data-state='error'] { color: #FFD7D2; }
+  .wl--light .wl__note[data-state='done'] { color: var(--ok-ink); }
+  .wl--purple .wl__note[data-state='done'] { color: #fff; }
+
+  @media (max-width: 460px) { .wl__row { flex-direction: column; } }
+</style>

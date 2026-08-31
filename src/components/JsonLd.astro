@@ -1,0 +1,94 @@
+---
+import { SITE, FAQ, PRICING } from '../data/site.mjs'
+
+/**
+ * One @graph so entities cross-reference by @id instead of repeating.
+ * Suvi ships as software (an Android launcher), so the product entity is a
+ * SoftwareApplication, not a physical Product.
+ */
+const org = {
+  '@type': 'Organization',
+  '@id': `${SITE.url}/#organization`,
+  name: SITE.name,
+  url: SITE.url,
+  logo: { '@type': 'ImageObject', url: new URL('/logo.png', SITE.url).href },
+  ...(SITE.legalName && { legalName: SITE.legalName }),
+  ...(SITE.foundingDate && { foundingDate: SITE.foundingDate }),
+  ...(SITE.sameAs.length && { sameAs: SITE.sameAs }),
+  ...(SITE.contactEmail && {
+    contactPoint: {
+      '@type': 'ContactPoint',
+      email: SITE.contactEmail,
+      contactType: 'customer support',
+    },
+  }),
+}
+
+const website = {
+  '@type': 'WebSite',
+  '@id': `${SITE.url}/#website`,
+  url: SITE.url,
+  name: SITE.name,
+  description: SITE.description,
+  publisher: { '@id': org['@id'] },
+  inLanguage: SITE.lang,
+}
+
+/** Monthly plans get a UnitPriceSpecification so the cadence isn't guessed. */
+const toOffer = (pl) => ({
+  '@type': 'Offer',
+  name: pl.name,
+  price: pl.amount,
+  priceCurrency: PRICING.currency,
+  availability: 'https://schema.org/PreOrder',
+  ...(pl.per?.includes('month') && {
+    priceSpecification: {
+      '@type': 'UnitPriceSpecification',
+      price: pl.amount,
+      priceCurrency: PRICING.currency,
+      referenceQuantity: { '@type': 'QuantitativeValue', value: 1, unitCode: 'MON' },
+    },
+  }),
+})
+
+const app = {
+  '@type': 'SoftwareApplication',
+  '@id': `${SITE.url}/#app`,
+  name: SITE.name,
+  description: SITE.description,
+  applicationCategory: 'UtilitiesApplication',
+  applicationSubCategory: 'Parental controls',
+  operatingSystem: 'Android',
+  publisher: { '@id': org['@id'] },
+  // Matches the age range the signup questionnaire actually offers.
+  audience: { '@type': 'PeopleAudience', suggestedMinAge: 8, suggestedMaxAge: 16 },
+  offers: PRICING.plans.map(toOffer),
+}
+
+const webpage = {
+  '@type': 'WebPage',
+  '@id': `${SITE.url}/#webpage`,
+  url: SITE.url,
+  name: SITE.title,
+  description: SITE.description,
+  isPartOf: { '@id': website['@id'] },
+  about: { '@id': app['@id'] },
+  inLanguage: SITE.lang,
+}
+
+
+const faq = FAQ.length
+  ? [{
+      '@type': 'FAQPage',
+      '@id': `${SITE.url}/#faq`,
+      mainEntity: FAQ.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    }]
+  : []
+
+const graph = { '@context': 'https://schema.org', '@graph': [org, website, webpage, app, ...faq] }
+---
+<script type="application/ld+json" set:html={JSON.stringify(graph)} />
