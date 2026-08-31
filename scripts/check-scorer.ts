@@ -5,7 +5,7 @@
  *   npx tsx scripts/check-scorer.ts
  */
 import { globSync, readFileSync } from 'node:fs'
-import { scoreDeterministic, total } from './lib/score.ts'
+import { langOf, scoreDeterministic, total } from './lib/score.ts'
 import { RISK } from './lib/patterns.ts'
 
 let failed = 0
@@ -37,9 +37,13 @@ check(
 )
 
 // Every published article must sit at or below the gate.
-for (const f of globSync('src/content/blog/*.md')) {
-  const s = total(scoreDeterministic(readFileSync(f, 'utf8')))
+for (const f of globSync('src/content/blog/**/*.md')) {
+  const md = readFileSync(f, 'utf8')
+  if (langOf(md) !== 'en') continue   // English-only taxonomy
+  const s = total(scoreDeterministic(md))
   check(`published: ${f.split('/').pop()}`, s <= RISK.low, `score ${s}`)
 }
+
+check('translations are skipped, not scored', langOf('---\nlang: es\n---\nHola.') === 'es', 'langOf reads front matter')
 
 process.exit(failed ? 1 : 0)

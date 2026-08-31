@@ -1,5 +1,6 @@
 ---
 import { SITE } from '../data/site.mjs'
+import { LOCALES, DEFAULT_LOCALE } from '../data/locales.mjs'
 
 interface Props {
   title?: string
@@ -9,6 +10,13 @@ interface Props {
   /** Set on pages that should not enter the index (thank-you pages, etc.). */
   noindex?: boolean
   type?: 'website' | 'article'
+  /** Locale code for this page. Drives html lang, og:locale and hreflang self-reference. */
+  locale?: string
+  /**
+   * Every locale this page exists in, as `{ code, path }`. Emitted as
+   * `hreflang` alternates plus `x-default`. Omit on pages with one version.
+   */
+  alternates?: { code: string; path: string }[]
 }
 
 const {
@@ -17,7 +25,20 @@ const {
   image = SITE.ogImage,
   noindex = false,
   type = 'website',
+  locale = DEFAULT_LOCALE,
+  alternates = [],
 } = Astro.props
+
+const loc = LOCALES[locale] ?? LOCALES[DEFAULT_LOCALE]
+
+// hreflang must be reciprocal and self-referential: every version lists every
+// version including itself, or Google drops the cluster. x-default points at
+// the English original, which is the one to serve when no locale matches.
+const alts = alternates.map((a) => ({
+  hreflang: LOCALES[a.code].hreflang,
+  href: new URL(a.path, Astro.site).href,
+  isDefault: a.code === DEFAULT_LOCALE,
+}))
 
 // Astro.site comes from astro.config.mjs, so canonicals are always absolute
 // and always point at the production origin regardless of build host.
@@ -50,7 +71,7 @@ const ogImage = new URL(image, Astro.site)
 <meta property="og:image" content={ogImage} />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:locale" content={SITE.locale} />
+<meta property="og:locale" content={loc.ogLocale} />
 
 <!-- Twitter / X -->
 <meta name="twitter:card" content="summary_large_image" />
@@ -62,6 +83,9 @@ const ogImage = new URL(image, Astro.site)
 
 <meta name="theme-color" content={SITE.themeColor} />
 <meta name="format-detection" content="telephone=no" />
+
+{alts.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
+{alts.filter((a) => a.isDefault).map((a) => <link rel="alternate" hreflang="x-default" href={a.href} />)}
 
 <link rel="sitemap" href="/sitemap-index.xml" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

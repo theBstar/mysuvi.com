@@ -1,0 +1,34 @@
+---
+import Base from '../../../layouts/Base.astro'
+import Article from '../../../components/Article.astro'
+import { SITE } from '../../../data/site.mjs'
+import { TRANSLATED_LOCALES } from '../../../data/locales.mjs'
+import { postsIn, translationIndex, alternatesFor, articleJsonLd, baseSlug } from '../../../lib/blog.mjs'
+
+export async function getStaticPaths() {
+  const index = await translationIndex()
+  const paths = []
+  for (const loc of TRANSLATED_LOCALES) {
+    for (const post of await postsIn(loc.code)) {
+      const slug = baseSlug(post)
+      paths.push({
+        params: { lang: loc.code, slug },
+        props: { post, locale: loc.code, slug, alternates: alternatesFor(index, slug) },
+      })
+    }
+  }
+  return paths
+}
+
+const { post, locale, slug, alternates } = Astro.props
+const jsonLd = articleJsonLd(post, locale, slug)
+---
+<Base
+  title={`${post.data.title} — ${SITE.name}`}
+  description={post.data.description}
+  locale={locale}
+  alternates={alternates}
+>
+  <script slot="head" type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+  <Article post={post} locale={locale} alternates={alternates} />
+</Base>

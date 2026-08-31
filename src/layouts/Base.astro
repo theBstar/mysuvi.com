@@ -7,6 +7,8 @@ import QuestionModal from '../components/QuestionModal.astro'
 import Nav from '../components/Nav.astro'
 import Footer from '../components/Footer.astro'
 import { SITE } from '../data/site.mjs'
+import { LOCALES, DEFAULT_LOCALE } from '../data/locales.mjs'
+import { localesWithPosts } from '../lib/blog.mjs'
 import '../styles/global.css'
 
 interface Props {
@@ -14,14 +16,24 @@ interface Props {
   description?: string
   image?: string
   noindex?: boolean
+  locale?: string
+  alternates?: { code: string; path: string }[]
 }
-const { title, description, image, noindex } = Astro.props
+const {
+  title, description, image, noindex,
+  locale = DEFAULT_LOCALE, alternates = [],
+} = Astro.props
+const loc = LOCALES[locale] ?? LOCALES[DEFAULT_LOCALE]
+const siteLocales = await localesWithPosts()
 ---
 <!doctype html>
-<html lang={SITE.lang}>
+<html lang={loc.htmlLang} dir={loc.dir}>
   <head>
-    <Seo title={title} description={description} image={image} noindex={noindex} />
-    <JsonLd />
+    <Seo
+      title={title} description={description} image={image} noindex={noindex}
+      locale={locale} alternates={alternates}
+    />
+    <JsonLd locales={siteLocales} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

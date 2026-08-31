@@ -1,0 +1,32 @@
+---
+import Base from '../../../layouts/Base.astro'
+import PostList from '../../../components/PostList.astro'
+import LangSwitch from '../../../components/LangSwitch.astro'
+import { SITE } from '../../../data/site.mjs'
+import { TRANSLATED_LOCALES, LOCALES, UI, blogPath } from '../../../data/locales.mjs'
+import { postsIn, localesWithPosts } from '../../../lib/blog.mjs'
+
+export async function getStaticPaths() {
+  const paths = []
+  for (const loc of TRANSLATED_LOCALES) {
+    const posts = await postsIn(loc.code)
+    if (posts.length) paths.push({ params: { lang: loc.code }, props: { locale: loc.code, posts } })
+  }
+  return paths
+}
+
+const { locale, posts } = Astro.props
+const t = UI[locale]
+const alternates = (await localesWithPosts()).map((code) => ({ code, path: blogPath(code) }))
+---
+<Base
+  title={`${t.blogTitle} — ${SITE.name}`}
+  description={t.blogIntro}
+  locale={locale}
+  alternates={alternates}
+>
+  <PostList posts={posts} locale={locale} />
+  <div class="shell" style="max-width:860px;padding-bottom:48px">
+    <LangSwitch locale={locale} alternates={alternates} />
+  </div>
+</Base>

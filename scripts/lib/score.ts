@@ -70,6 +70,15 @@ export function sentences(text: string): string[] {
     .filter((s) => s.length > 0)
 }
 
+/**
+ * Locale of a markdown file, from its front matter. The pattern taxonomy is
+ * English-only — running it over Spanish or Chinese prose produces noise, not
+ * findings — so every caller must skip anything but `en`.
+ */
+export function langOf(md: string): string {
+  return md.match(/^lang:\s*["']?([\w-]+)["']?\s*$/m)?.[1] ?? 'en'
+}
+
 export function scoreDeterministic(md: string): Finding[] {
   const out: Finding[] = []
   const body = prose(md)

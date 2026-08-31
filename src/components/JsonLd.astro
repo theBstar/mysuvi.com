@@ -1,5 +1,21 @@
 ---
 import { SITE, FAQ, PRICING } from '../data/site.mjs'
+import { LOCALES } from '../data/locales.mjs'
+
+interface Props {
+  /** Locales the site publishes in. Drives the WebSite's inLanguage. */
+  locales?: string[]
+}
+const { locales = ['en'] } = Astro.props
+
+/**
+ * The homepage-specific nodes — WebPage, SoftwareApplication, FAQPage — used to
+ * render on every page, which meant an article carried a WebPage node
+ * describing the homepage and a duplicate FAQPage. Harmless while the site was
+ * one language; actively contradictory once a Spanish article asserts an
+ * English homepage in its own graph. They now render only where they are true.
+ */
+const isHome = Astro.url.pathname.replace(/\/+$/, '') === ''
 
 /**
  * One @graph so entities cross-reference by @id instead of repeating.
@@ -31,7 +47,7 @@ const website = {
   name: SITE.name,
   description: SITE.description,
   publisher: { '@id': org['@id'] },
-  inLanguage: SITE.lang,
+  inLanguage: locales.map((c) => LOCALES[c].htmlLang),
 }
 
 /** Monthly plans get a UnitPriceSpecification so the cadence isn't guessed. */
@@ -89,6 +105,9 @@ const faq = FAQ.length
     }]
   : []
 
-const graph = { '@context': 'https://schema.org', '@graph': [org, website, webpage, app, ...faq] }
+const graph = {
+  '@context': 'https://schema.org',
+  '@graph': isHome ? [org, website, webpage, app, ...faq] : [org, website],
+}
 ---
 <script type="application/ld+json" set:html={JSON.stringify(graph)} />

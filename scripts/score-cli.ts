@@ -1,6 +1,6 @@
 /** Score one or more markdown files for AI-writing patterns. */
 import { readFileSync } from 'node:fs'
-import { scoreDeterministic, total } from './lib/score.ts'
+import { langOf, scoreDeterministic, total } from './lib/score.ts'
 import { riskOf } from './lib/patterns.ts'
 
 const files = process.argv.slice(2)
@@ -11,7 +11,14 @@ if (files.length === 0) {
 
 let worst = 0
 for (const f of files) {
-  const findings = scoreDeterministic(readFileSync(f, 'utf8'))
+  const md = readFileSync(f, 'utf8')
+  // The taxonomy is English-only. Scoring a translation measures nothing.
+  const lang = langOf(md)
+  if (lang !== 'en') {
+    console.log(`\n${f}  →  skipped (lang: ${lang})`)
+    continue
+  }
+  const findings = scoreDeterministic(md)
   const score = total(findings)
   worst = Math.max(worst, score)
   console.log(`\n${f}  →  score ${score} (${riskOf(score)})`)

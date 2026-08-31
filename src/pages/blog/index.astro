@@ -1,78 +1,24 @@
 ---
-import { getCollection } from 'astro:content'
 import Base from '../../layouts/Base.astro'
+import PostList from '../../components/PostList.astro'
+import LangSwitch from '../../components/LangSwitch.astro'
 import { SITE } from '../../data/site.mjs'
+import { DEFAULT_LOCALE, LOCALES, blogPath } from '../../data/locales.mjs'
+import { postsIn, localesWithPosts } from '../../lib/blog.mjs'
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft))
-  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+const posts = await postsIn(DEFAULT_LOCALE)
 
-const CLUSTERS = {
-  'first-phone': 'The first phone',
-  'screen-time': 'Screen time',
-  'online-safety': 'Online safety',
-  'digital-literacy': 'Digital literacy',
-  'family-life': 'Family life',
-}
-
-const fmt = (x) => x.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-const grouped = Object.keys(CLUSTERS)
-  .map((k) => ({ key: k, label: CLUSTERS[k], posts: posts.filter((p) => p.data.cluster === k) }))
-  .filter((g) => g.posts.length > 0)
+// The listing exists in every locale, so it carries its own hreflang cluster.
+const alternates = (await localesWithPosts()).map((code) => ({ code, path: blogPath(code) }))
 ---
 <Base
   title={`Digital parenting, without the panic — ${SITE.name}`}
   description="Practical writing on first phones, screen time, online safety and digital literacy — for parents deciding what to hand over and when."
+  locale={DEFAULT_LOCALE}
+  alternates={alternates}
 >
-  <section class="bl shell">
-    <header class="bl__head">
-      <p class="eyebrow">Blogs</p>
-      <h1 class="bl__h1">Digital parenting, <em>without the panic</em>.</h1>
-      <p class="lede">
-        What we're learning about first phones, earned freedom and the awkward
-        questions kids ask. Written for the decision in front of you, not for a
-        search engine.
-      </p>
-    </header>
-
-    {posts.length === 0 && <p class="bl__empty">Nothing published yet.</p>}
-
-    {grouped.map((g) => (
-      <section class="bl__group">
-        <h2 class="bl__group-h">{g.label}</h2>
-        <ul class="bl__list">
-          {g.posts.map((p) => (
-            <li class="bl__item">
-              <a href={`/blog/${p.id}`}>
-                <h3 class="bl__t">{p.data.title}</h3>
-                <p class="bl__d">{p.data.description}</p>
-                <p class="bl__m"><time datetime={p.data.pubDate.toISOString()}>{fmt(p.data.pubDate)}</time></p>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
-    ))}
-  </section>
+  <PostList posts={posts} locale={DEFAULT_LOCALE} />
+  <div class="shell" style="max-width:860px;padding-bottom:48px">
+    <LangSwitch locale={DEFAULT_LOCALE} alternates={alternates} />
+  </div>
 </Base>
-
-<style>
-  .bl { padding-block: clamp(40px, 6vw, 72px); max-width: 860px; }
-  .bl__head { max-width: 620px; margin-bottom: 52px; }
-  .bl__h1 { font-size: clamp(32px, 5.2vw, 48px); letter-spacing: -1.4px; }
-  .bl__h1 em { font-style: italic; color: var(--brand); }
-  .bl__head .lede { margin-top: 18px; }
-  .bl__empty { color: var(--muted); }
-  .bl__group { margin-bottom: 44px; }
-  .bl__group-h {
-    font-family: var(--font-ui); font-size: 12px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 1.6px; color: var(--brand);
-    padding-bottom: 10px; border-bottom: 1px solid var(--border-warm);
-  }
-  .bl__list { list-style: none; }
-  .bl__item { border-bottom: 1px solid var(--border); }
-  .bl__item a { display: block; padding: 22px 0; }
-  .bl__item a:hover .bl__t { color: var(--brand); }
-  .bl__t { font-size: 19px; font-weight: 500; letter-spacing: -0.2px; transition: color .15s ease; }
-  .bl__d { margin-top: 7px; font-size: 15px; color: var(--muted); max-width: 68ch; }
-  .bl__m { margin-top: 9px; font-size: 12.5px; color: var(--muted-warm-3); }
-</style>

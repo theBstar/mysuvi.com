@@ -1,0 +1,42 @@
+---
+import { LOCALES, UI } from '../data/locales.mjs'
+
+interface Props {
+  locale: string
+  alternates: { code: string; path: string }[]
+}
+const { locale, alternates } = Astro.props
+const t = UI[locale]
+---
+{alternates.length > 1 && (
+  <nav class="langsw" aria-label={t.readIn}>
+    <span class="langsw__k">{t.readIn}</span>
+    <ul>
+      {alternates.map((a) => (
+        <li>
+          {a.code === locale
+            ? <span aria-current="true">{LOCALES[a.code].nativeName}</span>
+            : <a href={a.path} hreflang={LOCALES[a.code].hreflang} lang={LOCALES[a.code].htmlLang}>
+                {LOCALES[a.code].nativeName}
+              </a>}
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<style>
+  .langsw {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px;
+    margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--border-warm);
+    font-size: 13px;
+  }
+  .langsw__k {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .langsw ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 14px; }
+  .langsw a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
+  .langsw a:hover { color: var(--brand); }
+  .langsw [aria-current] { color: var(--ink-2); font-weight: 600; }
+</style>

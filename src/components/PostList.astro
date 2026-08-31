@@ -1,0 +1,67 @@
+---
+import { UI, LOCALES, DEFAULT_LOCALE, articlePath } from '../data/locales.mjs'
+import { baseSlug } from '../lib/blog.mjs'
+
+interface Props {
+  posts: any[]
+  locale?: string
+}
+const { posts, locale = DEFAULT_LOCALE } = Astro.props
+const t = UI[locale]
+const loc = LOCALES[locale]
+
+const fmt = (x) =>
+  x.toLocaleDateString(locale === DEFAULT_LOCALE ? 'en-GB' : loc.htmlLang, {
+    day: 'numeric', month: 'short', year: 'numeric',
+  })
+
+const grouped = Object.keys(t.clusters)
+  .map((k) => ({ key: k, label: t.clusters[k], posts: posts.filter((p) => p.data.cluster === k) }))
+  .filter((g) => g.posts.length > 0)
+---
+<section class="bl shell">
+  <header class="bl__head">
+    <p class="eyebrow">{t.blog}</p>
+    <h1 class="bl__h1">{t.blogTitle}</h1>
+    <p class="lede">{t.blogIntro}</p>
+  </header>
+
+  {grouped.map((g) => (
+    <section class="bl__group">
+      <h2 class="bl__group-h">{g.label}</h2>
+      <ul class="bl__list">
+        {g.posts.map((p) => (
+          <li class="bl__item">
+            <a href={articlePath(locale, baseSlug(p))}>
+              <h3 class="bl__t">{p.data.title}</h3>
+              <p class="bl__d">{p.data.description}</p>
+              <p class="bl__m"><time datetime={p.data.pubDate.toISOString()}>{fmt(p.data.pubDate)}</time></p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</section>
+
+<style>
+  .bl { padding-block: clamp(40px, 6vw, 72px); max-width: 860px; }
+  .bl__head { max-width: 620px; margin-bottom: 52px; }
+  .bl__h1 { font-size: clamp(32px, 5.2vw, 48px); letter-spacing: -1.4px; }
+  .bl__h1 em { font-style: italic; color: var(--brand); }
+  .bl__head .lede { margin-top: 18px; }
+  .bl__empty { color: var(--muted); }
+  .bl__group { margin-bottom: 44px; }
+  .bl__group-h {
+    font-family: var(--font-ui); font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.6px; color: var(--brand);
+    padding-bottom: 10px; border-bottom: 1px solid var(--border-warm);
+  }
+  .bl__list { list-style: none; }
+  .bl__item { border-bottom: 1px solid var(--border); }
+  .bl__item a { display: block; padding: 22px 0; }
+  .bl__item a:hover .bl__t { color: var(--brand); }
+  .bl__t { font-size: 19px; font-weight: 500; letter-spacing: -0.2px; transition: color .15s ease; }
+  .bl__d { margin-top: 7px; font-size: 15px; color: var(--muted); max-width: 68ch; }
+  .bl__m { margin-top: 9px; font-size: 12.5px; color: var(--muted-warm-3); }
+</style>
