@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content'
 import Base from '../../layouts/Base.astro'
-import { SITE } from '../../data/site.mjs'
+import { AUTHOR, SITE } from '../../data/site.mjs'
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => !data.draft)
@@ -27,7 +27,13 @@ const jsonLd = {
       description: d.description,
       datePublished: d.pubDate.toISOString(),
       ...(d.updatedDate && { dateModified: d.updatedDate.toISOString() }),
-      author: { '@type': 'Organization', name: d.author, url: SITE.url },
+      author: {
+        '@type': 'Person',
+        name: d.author,
+        url: AUTHOR.url,
+        jobTitle: AUTHOR.role,
+        ...(AUTHOR.sameAs.length && { sameAs: AUTHOR.sameAs }),
+      },
       publisher: { '@id': `${SITE.url}/#organization` },
       mainEntityOfPage: { '@type': 'WebPage', '@id': url },
       inLanguage: SITE.lang,
@@ -55,6 +61,8 @@ const jsonLd = {
     <header>
       <h1 class="post__h1">{d.title}</h1>
       <p class="post__meta">
+        <a class="post__author" href={AUTHOR.url} rel="author">{d.author}</a>
+        <span aria-hidden="true"> · </span>
         <time datetime={d.pubDate.toISOString()}>{fmt(d.pubDate)}</time>
         {d.updatedDate && <span> · Updated {fmt(d.updatedDate)}</span>}
       </p>
@@ -101,6 +109,8 @@ const jsonLd = {
   .post__crumbs a:hover { color: var(--brand); }
   .post__h1 { font-size: clamp(30px, 5vw, 46px); letter-spacing: -1.2px; }
   .post__meta { margin-top: 14px; font-size: 13.5px; color: var(--muted); }
+  .post__author { color: var(--ink-2); font-weight: 500; }
+  .post__author:hover { color: var(--brand); }
 
   .post__answer {
     margin-top: 28px; padding: 18px 22px;

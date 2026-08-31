@@ -14,7 +14,7 @@ const blog = defineCollection({
     description: z.string().min(80).max(165),
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
-    author: z.string().default('Suvi'),
+    author: z.string().default('Bikram Sutar'),
     cluster: z.enum(['first-phone', 'screen-time', 'online-safety', 'digital-literacy', 'family-life']),
     tags: z.array(z.string()).default([]),
     /** The one question this page answers, verbatim. Drives the AEO summary. */

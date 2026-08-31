@@ -40,6 +40,30 @@ export const SITE = {
 }
 
 /**
+ * The named human behind the writing.
+ *
+ * This is not decoration. Articles previously carried an Organization byline,
+ * which (a) is the weakest possible E-E-A-T signal against competitors who put a
+ * named tester on every review, and (b) disqualifies us from every
+ * journalist-request platform, since all of them require a named source with a
+ * title. See `content/DISTRIBUTION.md`.
+ */
+export const AUTHOR = {
+  name: 'Bikram Sutar',
+  role: 'Founder, Suvi',
+  url: `${SITE.url}/about/`,
+  bio:
+    'Bikram Sutar is the founder of Suvi, an Android launcher that replaces blanket ' +
+    'parental controls with earned freedom. He writes here about first phones, screen ' +
+    'time and what the software in this category can and cannot do.',
+  /**
+   * Personal profiles, emitted as the Person `sameAs`. A personal LinkedIn here
+   * is worth adding before any journalist outreach — the platforms check.
+   */
+  sameAs: [],
+}
+
+/**
  * getwaitlist.com — the same list the kidli.club landing page feeds
  * (dashboard/21636). website.kidli uses their drop-in WIDGET_1 embed; we post
  * to the API directly instead, the way gethoply does, so the two forms keep the

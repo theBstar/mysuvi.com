@@ -1,0 +1,96 @@
+---
+import Base from '../layouts/Base.astro'
+import { AUTHOR, SITE, SOCIAL } from '../data/site.mjs'
+
+const url = `${SITE.url}/about/`
+
+// A ProfilePage carrying the Person the articles are bylined to. The `@id`
+// matches the `author.url` emitted by the article template, so the two resolve
+// to the same entity in the graph.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'ProfilePage',
+      '@id': `${url}#page`,
+      url,
+      mainEntity: { '@id': `${url}#person` },
+      isPartOf: { '@id': `${SITE.url}/#website` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${url}#person`,
+      name: AUTHOR.name,
+      url,
+      jobTitle: AUTHOR.role,
+      description: AUTHOR.bio,
+      worksFor: { '@id': `${SITE.url}/#organization` },
+      ...(AUTHOR.sameAs.length && { sameAs: AUTHOR.sameAs }),
+    },
+  ],
+}
+---
+<Base
+  title={`About ${AUTHOR.name} — ${SITE.name}`}
+  description={`${AUTHOR.name}, ${AUTHOR.role}. Who writes the guides on first phones, screen time and parental control software.`}
+>
+  <script slot="head" type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+
+  <article class="about shell">
+    <nav class="about__crumbs" aria-label="Breadcrumb">
+      <a href="/">Home</a> <span aria-hidden="true">/</span> <span>About</span>
+    </nav>
+
+    <h1 class="about__h1">{AUTHOR.name}</h1>
+    <p class="about__role">{AUTHOR.role}</p>
+
+    <div class="about__body">
+      <p>{AUTHOR.bio}</p>
+
+      <p>
+        Suvi is an Android launcher rather than a locked-down handset, so it runs
+        on the phone a family already owns. The argument behind it is that
+        restriction alone does not teach a child anything — it buys time while
+        they learn, and the learning has to be built in.
+      </p>
+
+      <h2>How the writing here works</h2>
+      <p>
+        Every article names its sources in the text and lists them at the bottom.
+        Where a number comes from a survey, the sample size and date are stated.
+        Nothing here invents a personal anecdote to sound warmer than it is, and
+        where a free tool does the job better than paying us, the articles say so
+        — the <a href="/blog/every-kind-of-parental-control-software/">landscape
+        guide</a> recommends Google Family Link outright for families it suits.
+      </p>
+
+      <h2>Getting in touch</h2>
+      <p>
+        Corrections and disagreements are welcome, particularly from parents who
+        have tried something that did not work.
+      </p>
+      <ul class="about__links">
+        {SOCIAL.map((s) => (
+          <li><a href={s.href} rel="me noopener" target="_blank">{s.label}</a></li>
+        ))}
+      </ul>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .about { max-width: 720px; padding-block: clamp(36px, 6vw, 64px); }
+  .about__crumbs { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+  .about__crumbs a { color: var(--muted); }
+  .about__crumbs a:hover { color: var(--brand); }
+  .about__h1 { font-size: clamp(30px, 5vw, 46px); letter-spacing: -1.2px; }
+  .about__role { margin-top: 8px; font-size: 14px; color: var(--muted); }
+  .about__body { margin-top: 32px; font-size: 17px; line-height: 1.75; color: var(--ink-2); }
+  .about__body p { margin-bottom: 20px; }
+  .about__body h2 {
+    font-family: var(--font-display); font-weight: 300; font-size: clamp(22px, 3vw, 27px);
+    letter-spacing: -0.7px; color: var(--ink); margin-top: 40px; margin-bottom: 12px;
+  }
+  .about__body a { text-decoration: underline; text-underline-offset: 2px; }
+  .about__links { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 18px; }
+</style>
