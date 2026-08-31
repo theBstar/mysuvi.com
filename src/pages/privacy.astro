@@ -133,9 +133,20 @@ const jsonLd = {
           tells Google you were here.
         </li>
         <li>
-          <strong>One item of browser storage.</strong> Your answer to the consent
-          banner is kept in your browser under <code>{ANALYTICS.consentKey}</code>
-          so we do not ask again on every page. It never leaves your device.
+          <strong>Two items of browser storage.</strong> Your answer to the consent
+          banner is kept under <code>{ANALYTICS.consentKey}</code> so we do not ask
+          again on every page, and the country you pick for pricing is kept under
+          <code>suvi.country.v1</code>. Both stay in your browser and never leave
+          your device.
+        </li>
+        <li>
+          <strong>A guess at your country, made on your device.</strong> To show
+          prices in your currency we read your browser's time zone and look the
+          country up in a table built into the page. No request is made, nothing is
+          sent to us or to anyone else, and we deliberately do not use an
+          IP-location service — which would mean handing your address to a company
+          that is not on the list below. The guess is often wrong for travellers
+          and VPN users, so the price section carries a selector that overrides it.
         </li>
       </ul>
 

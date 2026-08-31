@@ -37,6 +37,8 @@ export default {
       { href: '/privacy', label: 'Privacy' },
       { href: '#waitlist', label: 'Waitlist' },
     ],
+    countryLabel: 'Prices shown for',
+    countryNote: 'Detected from your time zone. Change it if we guessed wrong.',
     emailLabel: 'Email address',
     firstNameLabel: 'First name',
     lastNameLabel: 'Last name',
@@ -186,7 +188,7 @@ export default {
       per: '',
       amount: 0,
       badge: 'Founding',
-      later: '$49 one-time after launch',
+      later: '$99 one-time after launch',
       blurb: 'The safe launcher, a daily budget and bedtime, set up on the phone itself. Enough to replace a hand-me-down phone’s chaos.',
       features: [
         'Suvi launcher and app gating',
@@ -196,12 +198,12 @@ export default {
     },
     {
       name: 'Family',
-      price: '$8',
+      price: '$9.99',
       per: '/ month',
-      amount: 8,
+      amount: 9.99,
       featured: true,
       badge: 'Founding',
-      later: '$19 / month after launch',
+      later: '$30 / month after launch',
       blurb: 'Everything that makes Suvi different: quests, unlocks and the AI companion.',
       features: [
         'The parent dashboard and app',

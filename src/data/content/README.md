@@ -44,8 +44,8 @@ otherwise silent: answers simply stop being associated, with no error anywhere.
 entries renders two steps, not two translated entries followed by a stray
 English third. Translate a whole array or leave it out.
 
-**Pricing needs a currency.** If you override `pricing.plans[].price`, override
-`pricing.currency` too — it is what the `Offer` schema advertises, and a euro
-price labelled USD is worse than an untranslated one. This is why no landing page
-is translated yet: see `content/DISTRIBUTION.md`. Translating the page before
-pricing is localised sends a reader to a number that does not apply to them.
+**Pricing is not here.** It moved to `src/data/pricing.mjs`, keyed by country
+rather than language, because the two are different axes: Spanish spans Spain
+(EUR) and Mexico (MXN), Portuguese spans Portugal (EUR) and Brazil (BRL), and
+India is an English-language market with its own currency. Do not put prices in a
+locale file — the country selector will overwrite them at runtime.

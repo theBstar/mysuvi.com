@@ -9,6 +9,7 @@ import { SITE } from '../data/site.mjs'
 import { getContent } from '../lib/content.mjs'
 import { DEFAULT_LOCALE, LOCALES, homePath } from '../data/locales.mjs'
 import { contentLocales } from '../lib/content.mjs'
+import { COUNTRIES, COUNTRY_OPTIONS, DEFAULT_COUNTRY, TIMEZONE_COUNTRY } from '../data/pricing.mjs'
 
 interface Props { locale?: string }
 const { locale = DEFAULT_LOCALE } = Astro.props
@@ -118,19 +119,32 @@ const alternates = contentLocales.map((code) => ({ code, path: homePath(code) })
         <h2 class="h2">{PRICING.title}</h2>
         <p class="lede pricing__lede">{PRICING.body}</p>
         <p class="pricing__platform"><span aria-hidden="true"></span>{SITE.platformNote}</p>
+
+        <div class="pricing__country" hidden data-country-picker>
+          <label for="country">{c.ui.countryLabel}</label>
+          <select id="country" data-country-select>
+            {COUNTRY_OPTIONS.map((code) => (
+              <option value={code}>{COUNTRIES[code].name} ({COUNTRIES[code].currency})</option>
+            ))}
+          </select>
+          <p class="pricing__country-note">{c.ui.countryNote}</p>
+        </div>
       </div>
       <div class="plans">
         {PRICING.plans.map((pl) => (
-          <article class:list={['plan', pl.featured && 'plan--dark', 'reveal--scroll']}>
+          <article
+            class:list={['plan', pl.featured && 'plan--dark', 'reveal--scroll']}
+            data-plan={pl.featured ? 'family' : 'starter'}
+          >
             <div class="plan__top">
               <h3 class="plan__name">{pl.name}</h3>
               {pl.badge && <span class="plan__badge">{pl.badge}</span>}
             </div>
             <p class="plan__price">
-              <span class="plan__amount">{pl.price}</span>
+              <span class="plan__amount" data-price>{pl.price}</span>
               {pl.per && <span class="plan__per">{pl.per}</span>}
             </p>
-            {pl.later && <p class="plan__later">{pl.later}</p>}
+            {pl.later && <p class="plan__later" data-later>{pl.later}</p>}
             <p class="plan__blurb">{pl.blurb}</p>
             <ul class="plan__features">
               {pl.features.map((f) => <li>{f}</li>)}
@@ -163,6 +177,74 @@ const alternates = contentLocales.map((code) => ({ code, path: homePath(code) })
       <Waitlist tone="purple" id="closer" />
     </div>
   </section>
+
+<script
+  is:inline
+  define:vars={{
+    COUNTRIES, TIMEZONE_COUNTRY, DEFAULT_COUNTRY,
+    starterLater: PRICING.plans.find((pl) => !pl.featured)?.later ?? '',
+    familyLater: PRICING.plans.find((pl) => pl.featured)?.later ?? '',
+  }}
+>
+  (function () {
+    var KEY = 'suvi.country.v1'
+    var picker = document.querySelector('[data-country-picker]')
+    var select = document.querySelector('[data-country-select]')
+    if (!picker || !select) return
+
+    // The time zone is the only country signal a browser gives that is about
+    // where you are rather than what language you prefer. It is a guess — a VPN
+    // or a traveller lands wrong — hence the selector, which always wins.
+    function detect() {
+      try {
+        var stored = localStorage.getItem(KEY)
+        if (stored && COUNTRIES[stored]) return stored
+      } catch (e) {}
+      try {
+        var tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+        if (tz && TIMEZONE_COUNTRY[tz]) return TIMEZONE_COUNTRY[tz]
+      } catch (e) {}
+      return DEFAULT_COUNTRY
+    }
+
+    // `later` is a sentence with the price inside it, so the number is swapped
+    // within the sentence the locale already supplies rather than rebuilt here.
+    function swapPrice(text, from, to) {
+      return from && to ? text.split(from).join(to) : text
+    }
+
+    function apply(code) {
+      var c = COUNTRIES[code]
+      if (!c) return
+      var base = COUNTRIES[DEFAULT_COUNTRY]
+
+      var family = document.querySelector('[data-plan="family"]')
+      if (family) {
+        var amount = family.querySelector('[data-price]')
+        if (amount) amount.textContent = c.founding
+        var later = family.querySelector('[data-later]')
+        if (later) later.textContent = swapPrice(familyLater, base.usual, c.usual)
+      }
+
+      var starter = document.querySelector('[data-plan="starter"]')
+      if (starter) {
+        var sLater = starter.querySelector('[data-later]')
+        if (sLater) sLater.textContent = swapPrice(starterLater, base.starter, c.starter)
+      }
+
+      select.value = code
+      document.documentElement.setAttribute('data-country', code)
+    }
+
+    apply(detect())
+    picker.hidden = false
+
+    select.addEventListener('change', function () {
+      apply(select.value)
+      try { localStorage.setItem(KEY, select.value) } catch (e) {}
+    })
+  })()
+</script>
 </Base>
 
 <style>
@@ -247,6 +329,18 @@ const alternates = contentLocales.map((code) => ({ code, path: homePath(code) })
   /* Pricing */
   .pricing__head { text-align: center; max-width: 560px; margin: 0 auto 48px; }
   .pricing__lede { margin-top: 14px; margin-bottom: 18px; color: var(--body); }
+  .pricing__country {
+    margin-top: 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px;
+    font-size: 13.5px; color: var(--muted);
+  }
+  .pricing__country label { font-weight: 500; }
+  .pricing__country select {
+    font: inherit; color: var(--ink-2); padding: 6px 10px; border-radius: 999px;
+    border: 1px solid var(--border-warm); background: var(--bg);
+  }
+  .pricing__country select:hover { border-color: var(--brand); }
+  .pricing__country-note { flex-basis: 100%; font-size: 12.5px; color: var(--muted-warm-3); }
+
   .pricing__platform {
     display: inline-flex; align-items: flex-start; gap: 9px; text-align: left;
     background: var(--bg); border: 1px solid var(--border-warm); border-radius: 999px;
