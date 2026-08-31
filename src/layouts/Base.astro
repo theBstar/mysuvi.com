@@ -9,6 +9,7 @@ import Footer from '../components/Footer.astro'
 import { SITE } from '../data/site.mjs'
 import { LOCALES, DEFAULT_LOCALE } from '../data/locales.mjs'
 import { localesWithPosts } from '../lib/blog.mjs'
+import { getContent } from '../lib/content.mjs'
 import '../styles/global.css'
 
 interface Props {
@@ -25,6 +26,7 @@ const {
 } = Astro.props
 const loc = LOCALES[locale] ?? LOCALES[DEFAULT_LOCALE]
 const siteLocales = await localesWithPosts()
+const c = getContent(locale)
 ---
 <!doctype html>
 <html lang={loc.htmlLang} dir={loc.dir}>
@@ -44,7 +46,7 @@ const siteLocales = await localesWithPosts()
     <slot name="head" />
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">{c.ui.skipToContent}</a>
     <Nav />
     <main id="main"><slot /></main>
     <Footer />

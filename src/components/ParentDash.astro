@@ -1,12 +1,15 @@
 ---
 import Logo from './Logo.astro'
-import { PARENT } from '../data/site.mjs'
+import { getContent } from '../lib/content.mjs'
+import { localeFromPath } from '../data/locales.mjs'
+const c = getContent(localeFromPath(Astro.url.pathname))
+const PARENT = c.parent
 /** Parent dashboard panel. Decorative — the surrounding prose carries the meaning. */
 ---
 <div class="pd reveal--scroll" aria-hidden="true">
   <div class="pd__top">
     <Logo size="md" />
-    <span>Parent dashboard</span>
+    <span>{c.ui.mock.parentDash}</span>
   </div>
 
   <div class="pd__grid">
@@ -29,7 +32,7 @@ import { PARENT } from '../data/site.mjs'
     </div>
 
     <div class="pd__week">
-      <p class="pd__k">This week</p>
+      <p class="pd__k">{c.ui.mock.thisWeek}</p>
       <div class="pd__bars">
         {PARENT.bars.map((b) => (
           <div class="pd__bar"><i style={`height:${b.h}`}></i><span>{b.d}</span></div>

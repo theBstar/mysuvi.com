@@ -1,6 +1,9 @@
 ---
 import Logo from './Logo.astro'
 import { SITE, SOCIAL } from '../data/site.mjs'
+import { getContent } from '../lib/content.mjs'
+import { localeFromPath } from '../data/locales.mjs'
+const c = getContent(localeFromPath(Astro.url.pathname))
 const year = new Date().getFullYear()
 
 const ICONS = {
@@ -13,13 +16,8 @@ const ICONS = {
   <div class="shell ft__in">
     <Logo size="sm" />
 
-    <nav class="ft__links" aria-label="Footer">
-      <a href="#how">How it works</a>
-      <a href="#pricing">Pricing</a>
-      <a href="/blog">Blogs</a>
-      <a href="/about">About</a>
-      <a href="/privacy">Privacy</a>
-      <a href="#waitlist">Waitlist</a>
+    <nav class="ft__links" aria-label={c.ui.footerNav}>
+      {c.ui.footerLinks.map((l) => <a href={l.href}>{l.label}</a>)}
     </nav>
 
     <ul class="ft__social">

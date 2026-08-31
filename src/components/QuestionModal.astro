@@ -1,7 +1,15 @@
 ---
-import { QUESTIONS as Q } from '../data/site.mjs'
+import { getContent } from '../lib/content.mjs'
+import { localeFromPath } from '../data/locales.mjs'
+
+const c = getContent(localeFromPath(Astro.url.pathname))
+const Q = c.questions
+
+// `data-q` is the key getwaitlist matches an answer against and must stay the
+// untranslated `question`. `label` is what the visitor reads.
+const copy = JSON.stringify({ error: c.waitlist.errorNote })
 ---
-<div id="qm" class="qm" hidden>
+<div id="qm" class="qm" hidden data-copy={copy}>
   <div class="qm__scrim" data-close></div>
   <div class="qm__panel" role="dialog" aria-modal="true" aria-labelledby="qm-title">
     <h2 id="qm-title" class="qm__title">{Q.title}</h2>
@@ -10,11 +18,11 @@ import { QUESTIONS as Q } from '../data/site.mjs'
     <form class="qm__form">
       {Q.items.map((q) => (
         <div class="qm__field">
-          <label class="qm__label" for={`qm-${q.key}`}>{q.question}</label>
+          <label class="qm__label" for={`qm-${q.key}`}>{q.label ?? q.question}</label>
           {q.type === 'select' ? (
             <select id={`qm-${q.key}`} data-q={q.question}>
-              <option value="">Prefer not to say</option>
-              {q.options.map((o) => <option value={o}>{o}</option>)}
+              <option value="">{c.ui.preferNotToSay}</option>
+              {q.options.map((o) => <option value={o.value}>{o.label ?? o.value}</option>)}
             </select>
           ) : q.type === 'textarea' ? (
             <textarea id={`qm-${q.key}`} rows="3" placeholder={q.placeholder} data-q={q.question}></textarea>
@@ -36,6 +44,7 @@ import { QUESTIONS as Q } from '../data/site.mjs'
 
 <script>
   import { WAITLIST } from '../data/site.mjs'
+  const T = JSON.parse(document.getElementById('qm')?.dataset.copy || '{}')
   import { namesFromEmail } from '../lib/names.mjs'
 
   const root = document.getElementById('qm')
@@ -108,7 +117,7 @@ import { QUESTIONS as Q } from '../data/site.mjs'
           window.gtag('event', 'waitlist_signup', { method: 'getwaitlist', answered: answers.length })
         }
       } catch (err) {
-        errorEl.textContent = WAITLIST.errorNote
+        errorEl.textContent = T.error
         errorEl.hidden = false
       } finally {
         busy = false

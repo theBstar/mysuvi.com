@@ -1,19 +1,32 @@
 ---
 import { WAITLIST } from '../data/site.mjs'
+import { getContent } from '../lib/content.mjs'
+import { localeFromPath } from '../data/locales.mjs'
+
 interface Props { tone?: 'light' | 'purple'; id?: string }
 const { tone = 'light', id = 'wl' } = Astro.props
-const W = WAITLIST
+
+const c = getContent(localeFromPath(Astro.url.pathname))
+/** WAITLIST holds transport config; the copy is per-locale. */
+const W = { ...WAITLIST, ...c.waitlist }
+
+// The hoisted client script is bundled once for the whole site, so it cannot
+// import per-locale copy. Each instance carries its own strings instead.
+const copy = JSON.stringify({
+  busy: W.ctaLabelBusy, cta: W.ctaLabel, done: W.ctaLabelDone,
+  doneNote: W.doneNote, note: W.note, invalid: c.ui.invalidEmail,
+})
 ---
-<div id={`${id}-wl`} class:list={['wl', `wl--${tone}`]} data-waitlist>
+<div id={`${id}-wl`} class:list={['wl', `wl--${tone}`]} data-waitlist data-copy={copy}>
   <form class="wl__form" novalidate>
     {W.collectName && (
       <div class="wl__row">
-        <label class="visually-hidden" for={`${id}-first`}>First name</label>
+        <label class="visually-hidden" for={`${id}-first`}>{c.ui.firstNameLabel}</label>
         <input
           id={`${id}-first`} type="text" name="first_name"
           placeholder={W.firstNamePlaceholder} autocomplete="given-name" required data-first
         />
-        <label class="visually-hidden" for={`${id}-last`}>Last name</label>
+        <label class="visually-hidden" for={`${id}-last`}>{c.ui.lastNameLabel}</label>
         <input
           id={`${id}-last`} type="text" name="last_name"
           placeholder={W.lastNamePlaceholder} autocomplete="family-name" required data-last
@@ -21,7 +34,7 @@ const W = WAITLIST
       </div>
     )}
     <div class="wl__row">
-      <label class="visually-hidden" for={`${id}-email`}>Email address</label>
+      <label class="visually-hidden" for={`${id}-email`}>{c.ui.emailLabel}</label>
       <input
         id={`${id}-email`} type="email" name={W.fieldName}
         placeholder={W.placeholder} autocomplete="email" required data-email
@@ -33,8 +46,6 @@ const W = WAITLIST
 </div>
 
 <script>
-  import { WAITLIST } from '../data/site.mjs'
-
   // One handler for every instance on the page. Astro hoists and bundles this
   // once, however many times the component renders.
   document.querySelectorAll('[data-waitlist]').forEach((root) => {
@@ -45,6 +56,8 @@ const W = WAITLIST
     const button = root.querySelector('[data-submit]')
     const note = root.querySelector('[data-note]')
     if (!form || !input || !button || !note) return
+
+    const T = JSON.parse(root.dataset.copy || '{}')
 
     let busy = false
 
@@ -59,7 +72,7 @@ const W = WAITLIST
 
       const email = input.value.trim()
       if (!email || !input.checkValidity()) {
-        say('Please enter a valid email address.', 'error')
+        say(T.invalid, 'error')
         input.focus()
         return
       }
@@ -69,7 +82,7 @@ const W = WAITLIST
       // submits the address — the signup is never contingent on answering.
       busy = true
       button.disabled = true
-      button.textContent = WAITLIST.ctaLabelBusy
+      button.textContent = T.busy
       document.dispatchEvent(new CustomEvent('waitlist:ask', {
         detail: { email, source: root.id || form.id || '' },
       }))
@@ -78,16 +91,16 @@ const W = WAITLIST
     const reset = () => {
       busy = false
       button.disabled = false
-      button.textContent = WAITLIST.ctaLabel
+      button.textContent = T.cta
     }
 
     document.addEventListener('waitlist:done', (e) => {
       if (e.detail.source !== (root.id || form.id || '')) return
-      button.textContent = WAITLIST.ctaLabelDone
+      button.textContent = T.done
       button.disabled = true
       input.value = ''
       input.disabled = true
-      say(WAITLIST.doneNote, 'done')
+      say(T.doneNote, 'done')
     })
 
     document.addEventListener('waitlist:cancelled', (e) => {
@@ -96,7 +109,7 @@ const W = WAITLIST
     })
 
     // Clear an error as soon as they start fixing it.
-    const clear = () => { if (note.dataset.state === 'error') say(WAITLIST.note) }
+    const clear = () => { if (note.dataset.state === 'error') say(T.note) }
     ;[input, firstEl, lastEl].forEach((el) => el && el.addEventListener('input', clear))
   })
 </script>

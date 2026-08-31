@@ -1,5 +1,9 @@
 ---
 import Logo from './Logo.astro'
+import { getContent } from '../lib/content.mjs'
+import { localeFromPath } from '../data/locales.mjs'
+const c = getContent(localeFromPath(Astro.url.pathname))
+const m = c.ui.mock
 /** Hero device, rebuilt from the design's hero column. Decorative. */
 ---
 <div class="hp" aria-hidden="true">
@@ -7,19 +11,19 @@ import Logo from './Logo.astro'
   <div class="hp__body floaty">
     <div class="hp__screen">
       <div class="hp__status"><Logo size="xs" tone="dark" /><span>9:41</span></div>
-      <p class="hp__hi">Hey, Arjun</p>
-      <p class="hp__lvl">Explorer — Level 3</p>
+      <p class="hp__hi">{m.greeting}</p>
+      <p class="hp__lvl">{m.level}</p>
 
       <div class="hp__time">
-        <p class="hp__time-v">1h 47m</p>
-        <p class="hp__time-k">remaining today</p>
+        <p class="hp__time-v">{m.timeValue}</p>
+        <p class="hp__time-k">{m.timeLabel}</p>
         <div class="hp__bar"><i></i></div>
       </div>
 
       <div class="hp__quest">
-        <p class="hp__quest-k">Today’s quest</p>
-        <p class="hp__quest-t">Read for 20 minutes</p>
-        <p class="hp__quest-r">+30 points · bike gear 980/1,500</p>
+        <p class="hp__quest-k">{m.questLabel}</p>
+        <p class="hp__quest-t">{m.questTitle}</p>
+        <p class="hp__quest-r">{m.questReward}</p>
       </div>
 
       <div class="hp__apps">
@@ -30,10 +34,10 @@ import Logo from './Logo.astro'
       </div>
 
       <div class="hp__dock">
-        <span><i></i>Home</span>
-        <span><i></i>Phone</span>
-        <span class="hp__dock-mid"><b><Logo size="xs" tone="brand" markOnly /></b>Suvi</span>
-        <span><i></i>Quests</span>
+        <span><i></i>{m.dock.home}</span>
+        <span><i></i>{m.dock.phone}</span>
+        <span class="hp__dock-mid"><b><Logo size="xs" tone="brand" markOnly /></b>{m.dock.brand}</span>
+        <span><i></i>{m.dock.quests}</span>
       </div>
     </div>
   </div>

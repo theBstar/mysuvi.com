@@ -76,10 +76,29 @@ export const TRANSLATED_LOCALES = Object.values(LOCALES).filter((l) => l.code !=
 
 export const localeCodes = Object.keys(LOCALES)
 
+/**
+ * Locale implied by a URL path. `/es/blog/x` -> `es`, `/blog/x` -> `en`.
+ *
+ * Components derive their locale this way rather than taking a prop, because
+ * the site is fully static: the path is known at build time and always agrees
+ * with the route that produced it, so prop-drilling a locale through Nav,
+ * Footer and every mockup would add ceremony without adding correctness.
+ */
+export function localeFromPath(pathname) {
+  const seg = pathname.split('/').filter(Boolean)[0]
+  return seg && LOCALES[seg] && seg !== DEFAULT_LOCALE ? seg : DEFAULT_LOCALE
+}
+
 /** Site-relative path for a blog article in a given locale. */
 export function articlePath(locale, slug) {
   const p = LOCALES[locale].prefix
   return p ? `/${p}/blog/${slug}/` : `/blog/${slug}/`
+}
+
+/** Site-relative path for the landing page in a given locale. */
+export function homePath(locale) {
+  const p = LOCALES[locale].prefix
+  return p ? `/${p}/` : '/'
 }
 
 /** Site-relative path for the blog index in a given locale. */

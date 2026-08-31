@@ -1,6 +1,10 @@
 ---
 import { ANALYTICS } from '../data/site.mjs'
+import { getContent } from '../lib/content.mjs'
+import { localeFromPath } from '../data/locales.mjs'
+
 const key = ANALYTICS.consentKey
+const c = getContent(localeFromPath(Astro.url.pathname))
 const enabled = Boolean(ANALYTICS.gaMeasurementId) && import.meta.env.PROD
 ---
 {enabled && (
@@ -15,13 +19,12 @@ const enabled = Boolean(ANALYTICS.gaMeasurementId) && import.meta.env.PROD
     >
       <div class="cb__card">
         <p id="consent-t" class="cb__text">
-          Suvi uses Google Analytics to see which parts of this page are useful.
-          Nothing goes to advertisers or data brokers.
-          <a class="cb__link" href="/privacy">What we collect</a>
+          {c.ui.consent.text}{' '}
+          <a class="cb__link" href="/privacy">{c.ui.consent.link}</a>
         </p>
         <div class="cb__actions">
-          <button type="button" class="cb__btn cb__btn--ghost" data-decline>Decline</button>
-          <button type="button" class="cb__btn cb__btn--primary" data-accept>Accept</button>
+          <button type="button" class="cb__btn cb__btn--ghost" data-decline>{c.ui.consent.decline}</button>
+          <button type="button" class="cb__btn cb__btn--primary" data-accept>{c.ui.consent.accept}</button>
         </div>
       </div>
     </div>

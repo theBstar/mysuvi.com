@@ -1,5 +1,8 @@
 import type { APIRoute } from 'astro'
-import { SITE, FAQ } from '../data/site.mjs'
+import { SITE } from '../data/site.mjs'
+import { getContent } from '../lib/content.mjs'
+
+const FAQ = getContent().faq
 
 /**
  * llms.txt — a plain-text brief for answer engines that would otherwise have to

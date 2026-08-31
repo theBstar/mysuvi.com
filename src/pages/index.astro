@@ -5,12 +5,29 @@ import KidScreens from '../components/KidScreens.astro'
 import ParentDash from '../components/ParentDash.astro'
 import Waitlist from '../components/Waitlist.astro'
 import Logo from '../components/Logo.astro'
-import {
-  HERO, WAITLIST, PROOF_POINTS, STEPS, KID,
-  PARENT, SAFETY, PRICING, CLOSER, FAQ, SITE,
-} from '../data/site.mjs'
+import { SITE } from '../data/site.mjs'
+import { getContent } from '../lib/content.mjs'
+import { DEFAULT_LOCALE, LOCALES, homePath } from '../data/locales.mjs'
+import { contentLocales } from '../lib/content.mjs'
+
+interface Props { locale?: string }
+const { locale = DEFAULT_LOCALE } = Astro.props
+
+const c = getContent(locale)
+const {
+  hero: HERO, waitlist: WAITLIST, proofPoints: PROOF_POINTS, steps: STEPS,
+  kid: KID, parent: PARENT, safety: SAFETY, pricing: PRICING, closer: CLOSER, faq: FAQ,
+} = c
+
+// The landing page exists in every locale that has a content file.
+const alternates = contentLocales.map((code) => ({ code, path: homePath(code) }))
 ---
-<Base>
+<Base
+  title={c.meta?.title ?? SITE.title}
+  description={c.meta?.description ?? SITE.description}
+  locale={locale}
+  alternates={alternates}
+>
   {/* ── Hero ─────────────────────────────────────────────────────────── */}
   <section class="hero shell">
     <div class="reveal">

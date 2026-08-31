@@ -1,0 +1,21 @@
+---
+/**
+ * Landing page for every locale that has a content file.
+ *
+ * Right now only `en` does, so this route generates nothing — which is the
+ * point. The machinery is in place, and adding `src/data/content/es.mjs` is the
+ * whole job of shipping a Spanish landing page.
+ */
+import Landing from '../index.astro'
+import { contentLocales } from '../../lib/content.mjs'
+import { DEFAULT_LOCALE } from '../../data/locales.mjs'
+
+export async function getStaticPaths() {
+  return contentLocales
+    .filter((code) => code !== DEFAULT_LOCALE)
+    .map((code) => ({ params: { lang: code }, props: { locale: code } }))
+}
+
+const { locale } = Astro.props
+---
+<Landing locale={locale} />

@@ -1,11 +1,15 @@
 ---
 import Logo from './Logo.astro'
-import { NAV, WAITLIST } from '../data/site.mjs'
+import { getContent } from '../lib/content.mjs'
+import { localeFromPath } from '../data/locales.mjs'
+const c = getContent(localeFromPath(Astro.url.pathname))
+const NAV = c.nav
+const WAITLIST = c.waitlist
 ---
 <header class="nav">
   <div class="shell nav__in">
-    <a href="/" class="nav__brand" aria-label="Suvi — home"><Logo size="lg" animate /></a>
-    <nav class="nav__links" aria-label="Primary">
+    <a href="/" class="nav__brand" aria-label={c.ui.navHome}><Logo size="lg" animate /></a>
+    <nav class="nav__links" aria-label={c.ui.navPrimary}>
       {NAV.map((i) => <a href={i.href}>{i.label}</a>)}
       <a href="#waitlist" class="nav__cta">{WAITLIST.ctaLabel}</a>
     </nav>

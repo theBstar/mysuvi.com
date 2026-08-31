@@ -1,5 +1,8 @@
 ---
-import { KID } from '../data/site.mjs'
+import { getContent } from '../lib/content.mjs'
+import { localeFromPath } from '../data/locales.mjs'
+const c = getContent(localeFromPath(Astro.url.pathname))
+const KID = c.kid
 /** The two kid-side screens (Quests / Unlocks). Decorative. */
 ---
 <div class="ks" aria-hidden="true">
