@@ -36,6 +36,20 @@ check(
   'bare "i cannot"',
 )
 
+// Broadening the attribution check must not let an unsourced statistic through.
+check(
+  'named-source attribution accepted',
+  !scoreDeterministic('Google asks for at least 70% battery before a reset.')
+    .some((f) => f.pattern === 'fabricated-precision'),
+  '"Google asks for 70%"',
+)
+check(
+  'bare statistic still caught',
+  scoreDeterministic('Fully 73% of parents struggle with this every single day.')
+    .some((f) => f.pattern === 'fabricated-precision'),
+  '"73% of parents"',
+)
+
 // Every published article must sit at or below the gate.
 for (const f of globSync('src/content/blog/**/*.md')) {
   const md = readFileSync(f, 'utf8')

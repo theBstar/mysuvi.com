@@ -209,7 +209,13 @@ export function scoreDeterministic(md: string): Finding[] {
     // No trailing \b: '%' and the following space are both non-word chars,
     // so a boundary never matches there and every percentage was missed.
     const hasStat = /\b\d+(?:\.\d+)?\s?(?:%|percent\b|x\b)/i.test(s)
-    const hasSource = /\b(?:according to|sources?|stud(?:y|ies)|surveys?|reports?|research|found by|\[\d+\]|per )\b/i.test(s)
+    // A named organisation plus an attributing verb counts as a source:
+    // "Google asks for at least 70%" is attributed, "73% of parents" is not.
+    const namedSource =
+      /\b[A-Z][A-Za-z&.'’-]*(?:\s+(?:of|for|and|the)?\s*[A-Z][A-Za-z&.'’-]*)*(?:'s|’s)?\s+(?:says?|said|states?|asks?|advises?|recommends?|requires?|reports?|found|puts?|notes?|specifies)\b/.test(s)
+    const hasSource =
+      /\b(?:according to|sources?|stud(?:y|ies)|surveys?|reports?|research|found by|\[\d+\]|per )\b/i.test(s) ||
+      namedSource
     if (hasStat && !hasSource) {
       out.push({
         pattern: 'fabricated-precision',
